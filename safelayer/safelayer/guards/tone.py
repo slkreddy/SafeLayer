@@ -15,3 +15,9 @@ class ToneGuard(BaseGuard):
             results.append({
                 "entity": "profanity",
                 "start": m.start(),
+                "end": m.end(),
+                "explanation": f"Profanity '{m.group()}' @ {m.span()}"})
+        return results
+
+    def mask(self, text):
+        return PROF_RE.sub("****", text)
