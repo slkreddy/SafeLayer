@@ -92,5 +92,3 @@ Apache 2.0 (c) 2025 [LaxmiKumar Sammeta](https://github.com/slkreddy/)
 https://github.com/slkreddy/SafeLayer/
 ```
 
-***
-
