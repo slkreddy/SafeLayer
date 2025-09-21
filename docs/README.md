@@ -17,3 +17,83 @@
 
 ## Quickstart
 
+
+## Quickstart
+
+```
+from safelayer.guards import PIIGuard, ToneGuard
+from safelayer.manager import GuardManager
+
+guards = [PIIGuard(), ToneGuard(warn_only=True)]
+manager = GuardManager(guards)
+
+text = "Hi, my email is john.doe@gmail.com. Damn, that's crazy!"
+cleaned = manager.run(text)
+print(cleaned)
+# Output: "Hi, my email is [EMAIL MASKED]. ****, that's crazy!"
+```
+
+### Function Decorator Pattern
+
+```
+from safelayer.decorators import apply_guards
+
+@apply_guards(manager)
+def agent_response():
+    return "Contact me at alice@acme.com. Crap!"
+
+print(agent_response())
+# Output: "Contact me at [EMAIL MASKED]. ****!"
+```
+
+---
+
+## Extending with Custom Guards
+
+Create your own guard by inheriting `BaseGuard`:
+
+```
+from safelayer.guards.base import BaseGuard
+
+class CustomGuard(BaseGuard):
+    def check(self, text):
+        # Your detection logic...
+        return [{"entity": "custom", "start": 0, "end": 4, "explanation": "Example"}]
+
+    def mask(self, text):
+        return text.replace('bad', '[REDACTED]')
+```
+
+---
+
+## Tests
+
+Run all built-in unit tests (pytest-style):
+
+```
+python -m pytest tests/
+```
+
+---
+
+## Documentation
+
+- See `docs/architecture.md` for technical design.
+- See `docs/developer_guide.md` for custom guard authoring.
+- Example workflows in `examples/`.
+
+---
+
+## License
+
+Apache 2.0 (c) 2025 [LaxmiKumar Sammeta](https://github.com/slkreddy/)
+
+---
+
+## Repository
+
+https://github.com/slkreddy/SafeLayer/
+```
+
+***
+
