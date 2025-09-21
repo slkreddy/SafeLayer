@@ -82,12 +82,10 @@ python -m pytest tests/
 - See `docs/developer_guide.md` for custom guard authoring.
 - Example workflows in `examples/`.
 
----
 
 ## License
 
 Apache 2.0 (c) 2025 [LaxmiKumar Sammeta](https://github.com/slkreddy/)
-
 
 ## Repository
 
