@@ -99,9 +99,3 @@ python -m pytest tests/
 - Follow PEP-8 style
 - Document new guards in `docs/`
 - Provide CLI or API usage samples if extending
-
-
-
-***
-
-Reply “next” for the following file (architecture.md, examples, or tests), or request any specific type next.
