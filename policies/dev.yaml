@@ -1,0 +1,97 @@
+# SafeLayer Development Policy Configuration
+# This policy defines guard behaviors for development environments
+
+policy_name: "development"
+version: "1.0"
+description: "Development environment policy with relaxed constraints and detailed logging"
+
+# Global settings
+global:
+  log_level: "DEBUG"
+  audit_enabled: true
+  audit_backend: "file"
+  audit_path: "./logs/safelayer_audit.jsonl"
+  fail_fast: false
+  default_action: "warn"
+
+# Guard configurations
+guards:
+  pii:
+    enabled: true
+    action: "mask"  # mask, warn, block, log
+    confidence_threshold: 0.7
+    entities:
+      - email
+      - phone
+      - ssn
+      - credit_card
+      - ip_address
+    masking:
+      email: "[EMAIL_MASKED]"
+      phone: "[PHONE_MASKED]"
+      ssn: "[SSN_MASKED]"
+      credit_card: "[CC_MASKED]"
+      ip_address: "[IP_MASKED]"
+    
+  tone:
+    enabled: true
+    action: "warn"
+    severity_threshold: "medium"  # low, medium, high
+    categories:
+      - profanity
+      - toxicity
+      - harassment
+    replacement_text: "****"
+    
+  tts:
+    enabled: false  # TTS safety disabled in dev
+    action: "log"
+    audio_analysis: false
+    
+# Custom rules (optional)
+custom_rules:
+  - name: "api_key_detection"
+    pattern: "(?i)(api[_-]?key|token)[\s]*[:=][\s]*['\"][a-zA-Z0-9]{20,}['\"]?"
+    action: "block"
+    message: "API key detected and blocked"
+    
+  - name: "internal_domain_detection"
+    pattern: "@(internal|corp|dev)\.company\.com"
+    action: "warn"
+    message: "Internal domain reference detected"
+
+# Environment-specific settings
+environment:
+  type: "development"
+  strict_mode: false
+  performance_monitoring: true
+  detailed_explanations: true
+  
+# Integration settings
+integrations:
+  presidio:
+    enabled: false  # Use regex-based detection in dev
+  
+  custom_nlp:
+    enabled: false
+    
+# Reporting and metrics
+reporting:
+  enabled: true
+  interval_minutes: 15
+  metrics:
+    - guard_hits
+    - processing_time
+    - error_rate
+    - confidence_scores
+
+# Rate limiting (per minute)
+rate_limiting:
+  enabled: false  # Disabled for dev
+  requests_per_minute: 1000
+  
+# Caching
+caching:
+  enabled: true
+  ttl_seconds: 300
+  max_entries: 1000
