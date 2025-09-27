@@ -1,0 +1,165 @@
+# SafeLayer Production Policy Configuration
+# This policy defines strict guard behaviors for production environments
+
+policy_name: "production"
+version: "1.0"
+description: "Production environment policy with strict security controls and compliance focus"
+
+# Global settings
+global:
+  log_level: "INFO"
+  audit_enabled: true
+  audit_backend: "database"  # More robust than file in prod
+  audit_path: "/var/log/safelayer/audit.jsonl"
+  fail_fast: true  # Stop processing on critical violations
+  default_action: "block"  # Strict by default
+
+# Guard configurations
+guards:
+  pii:
+    enabled: true
+    action: "block"  # Block PII in production
+    confidence_threshold: 0.85  # Higher confidence required
+    entities:
+      - email
+      - phone
+      - ssn
+      - credit_card
+      - ip_address
+      - passport
+      - driver_license
+      - bank_account
+    masking:
+      email: "[REDACTED]"
+      phone: "[REDACTED]"
+      ssn: "[REDACTED]"
+      credit_card: "[REDACTED]"
+      ip_address: "[REDACTED]"
+      passport: "[REDACTED]"
+      driver_license: "[REDACTED]"
+      bank_account: "[REDACTED]"
+    
+  tone:
+    enabled: true
+    action: "block"  # Block inappropriate tone
+    severity_threshold: "low"  # Catch even mild violations
+    categories:
+      - profanity
+      - toxicity
+      - harassment
+      - hate_speech
+      - threats
+    replacement_text: "[CONTENT_BLOCKED]"
+    
+  tts:
+    enabled: true
+    action: "block"
+    audio_analysis: true
+    voice_cloning_detection: true
+    
+# Custom rules for production security
+custom_rules:
+  - name: "api_key_detection"
+    pattern: "(?i)(api[_-]?key|token|secret)[\s]*[:=][\s]*['\"][a-zA-Z0-9]{10,}['\"]?"
+    action: "block"
+    message: "Potential API key or secret detected and blocked"
+    
+  - name: "internal_domain_strict"
+    pattern: "@(internal|corp|dev|staging)\.(company|organization)\.(com|net|org)"
+    action: "block"
+    message: "Internal domain reference blocked for security"
+    
+  - name: "database_connection_strings"
+    pattern: "(?i)(jdbc:|mongodb:|mysql:|postgresql:|server=|database=|pwd=|password=)"
+    action: "block"
+    message: "Database connection string detected and blocked"
+    
+  - name: "cloud_credentials"
+    pattern: "(?i)(aws_access_key_id|aws_secret_access_key|azure_client_secret|gcp_service_account)"
+    action: "block"
+    message: "Cloud credentials detected and blocked"
+
+# Environment-specific settings
+environment:
+  type: "production"
+  strict_mode: true
+  performance_monitoring: true
+  detailed_explanations: false  # Minimize info leakage
+  security_headers: true
+  
+# Integration settings
+integrations:
+  presidio:
+    enabled: true  # Use advanced PII detection in prod
+    confidence_threshold: 0.85
+    
+  custom_nlp:
+    enabled: true
+    model: "production_classifier"
+    
+# Reporting and metrics
+reporting:
+  enabled: true
+  interval_minutes: 5  # Frequent reporting in prod
+  metrics:
+    - guard_hits
+    - processing_time
+    - error_rate
+    - confidence_scores
+    - blocked_requests
+    - security_violations
+  alerts:
+    enabled: true
+    channels:
+      - email
+      - slack
+      - pagerduty
+    thresholds:
+      error_rate: 5.0  # Alert if >5% errors
+      blocked_requests: 100  # Alert if >100 blocks/hour
+
+# Rate limiting (strict in production)
+rate_limiting:
+  enabled: true
+  requests_per_minute: 100
+  burst_limit: 20
+  
+# Caching (optimized for production)
+caching:
+  enabled: true
+  ttl_seconds: 600  # Longer cache in prod
+  max_entries: 10000
+  
+# Security settings
+security:
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+  
+  access_control:
+    enabled: true
+    allowed_sources:
+      - "internal_network"
+      - "trusted_partners"
+      
+  data_residency:
+    enabled: true
+    regions:
+      - "us-east-1"
+      - "eu-west-1"
+      
+# Compliance settings
+compliance:
+  gdpr:
+    enabled: true
+    data_retention_days: 90
+    
+  hipaa:
+    enabled: false  # Enable if handling health data
+    
+  pci:
+    enabled: true  # Enable for payment processing
+    
+  sox:
+    enabled: true  # Financial compliance
+    audit_trail: true
