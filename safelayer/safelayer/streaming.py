@@ -1,39 +1,3 @@
-"""Real-time streaming and HTTP API interface for SafeLayer.
-
-Provides:
-- FastAPI HTTP endpoints for synchronous guard processing
-- WebSocket endpoint for real-time streaming moderation/masking
-- Server-Sent Events (SSE) support for streaming audit events (best-effort)
-- Lightweight, optional dependencies pattern
-"""
-from typing import Any, Dict, List, Optional
-import json
-import asyncio
-
-try:
-    from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-    from fastapi.responses import JSONResponse
-    from fastapi.middleware.cors import CORSMiddleware
-    from pydantic import BaseModel
-    FASTAPI_AVAILABLE = True
-except Exception:
-    FASTAPI_AVAILABLE = False
-
-from .manager import GuardManager
-from .guards.base import BaseGuard
-
-
-class _TextIn(BaseModel) if FASTAPI_AVAILABLE else object:  # type: ignore
-    if FASTAPI_AVAILABLE:
-        text: str
-        explain: Optional[bool] = False
-    else:
-        pass
-
-
-class StreamingServer:
-    def __init__(self, guards: List[BaseGuard]):
-        self.manager = GuardManager(guards)
         self.app = None
         if FASTAPI_AVAILABLE:
             self._build_app()
@@ -49,7 +13,7 @@ class StreamingServer:
         )
 
         @app.get("/health")
-        async def health() -> Dict[str, str]:  # noqa: D401
+        async def health() -> Dict[str, str]:
             return {"status": "ok"}
 
         @app.post("/process")
